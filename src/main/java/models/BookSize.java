@@ -22,4 +22,13 @@ public class BookSize {
     public int hashCode() {
         return Objects.hash(height, weight, length);
     }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "height=" + height +
+                ", weight=" + weight +
+                ", length=" + length +
+                '}';
+    }
 }

@@ -21,4 +21,12 @@ public class BookAdditional {
     public int hashCode() {
         return Objects.hash(pageCount, size);
     }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "pageCount=" + pageCount +
+                ", size=" + size +
+                '}';
+    }
 }

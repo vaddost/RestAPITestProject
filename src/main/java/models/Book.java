@@ -5,11 +5,16 @@ import java.util.Objects;
 public class Book {
     private int bookId;
     private String bookName;
+    private String bookLanguage;
     private String bookDescription;
     private BookAdditional additional;
     private int publicationYear;
 
     public Book() {
+    }
+
+    public void setBookId(int bookId){
+        this.bookId = bookId;
     }
 
     @Override
@@ -27,5 +32,16 @@ public class Book {
     @Override
     public int hashCode() {
         return Objects.hash(bookId, bookName, bookDescription, additional, publicationYear);
+    }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "bookId=" + bookId +
+                ", bookName='" + bookName + '\'' +
+                ", bookDescription='" + bookDescription + '\'' +
+                ", additional=" + additional +
+                ", publicationYear=" + publicationYear +
+                '}';
     }
 }

@@ -22,10 +22,12 @@ public class BooksService {
                 .get("/books");
     }
 
-    public Response getAllBooksOnPage(int pageNumber){
+    public Response getAllBooksOnPage(int pageNumber, String orderType, String sortBy){
         return given()
                 .spec(requestSpecification)
                 .param("page", pageNumber)
+                .param("orderType", orderType)
+                .param("sortBy", sortBy)
                 .when()
                 .get("/books");
     }
@@ -58,5 +60,14 @@ public class BooksService {
                 .spec(requestSpecification)
                 .when()
                 .delete("/book/{bookId}", bookId);
+    }
+
+    public int generateNewBookId(){
+        int maxBookId = getAllBooksOnPage(1, "desc", "bookId")
+                .then()
+                .extract()
+                .jsonPath()
+                .getInt("[0].bookId");
+        return maxBookId + 1;
     }
 }

@@ -1,0 +1,18 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd" >
+
+<suite name="BooksApiTests" verbose="1" >
+    <parameter name="existedBookId" value="51" />
+    <test name="GetBookApiTests" >
+        <classes>
+            <class name="tests.GetBookTests" />
+        </classes>
+    </test>
+
+    <test name="CreateNewBookApiTests">
+        <parameter name="authorId" value="75" />
+        <parameter name="genreId" value="1497" />
+        <classes>
+            <class name="tests.CreateNewBookTests"/>
+        </classes>
+    </test>
+</suite>

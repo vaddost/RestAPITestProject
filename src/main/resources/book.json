@@ -1,0 +1,15 @@
+{
+  "bookId": 0,
+  "bookName": "Kobzar",
+  "bookLanguage": "ukrainian",
+  "bookDescription": "a book of poems by Ukrainian poet and painter Taras Shevchenko,[1] first published by him in 1840 in Saint Petersburg, Russia.",
+  "additional": {
+    "pageCount": 217,
+    "size": {
+      "height": 33.1,
+      "width": 29.4,
+      "length": 4.1
+    }
+  },
+  "publicationYear": 1974
+}
