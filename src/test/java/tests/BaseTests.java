@@ -1,47 +1,52 @@
 package tests;
 
-import com.google.gson.Gson;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
+import com.github.javafaker.Faker;
 import models.Book;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
-import org.testng.annotations.Parameters;
-import service.BooksService;
+import service.book.GetAllBooksService;
 import utils.JsonToObjectParser;
-import utils.PropertiesReader;
-
-import java.io.FileInputStream;
-import java.util.Iterator;
 
 public class BaseTests {
-    PropertiesReader propertiesReader;
-    BooksService booksService;
     int existedBookId;
 
-    @BeforeClass
-    @Parameters({"existedBookId"})
-    public void setUp(int existedBookId) {
-        propertiesReader = PropertiesReader.getPropertiesReader();
-        RequestSpecification requestSpecification = new RequestSpecBuilder()
-                .setBaseUri(propertiesReader.getBaseUri())
-                .setBasePath(propertiesReader.getBasePath())
-                .setContentType(ContentType.JSON)
-                .build();
-        booksService = new BooksService(requestSpecification);
-
-        this.existedBookId = existedBookId;
+    @BeforeTest
+    public void setUp() {
+        this.existedBookId = GetAllBooksService.getMaxBookId();
     }
 
     @DataProvider(name = "new_book_test_data")
     public Object[][] getNewBook(){
         JsonToObjectParser<Book> jsonToObjectParser = new JsonToObjectParser<>();
         Book newBook = jsonToObjectParser.parseJsonFileToObject("src/main/resources/book.json", Book.class);
+        newBook.setBookId(GetAllBooksService.getMaxBookId() + 1);
         return new Object[][]{
                 {
                     newBook
+                }
+        };
+    }
+
+    @DataProvider(name = "update_book_test_data")
+    public Object[][] updateBookData(){
+        GetAllBooksService getAllBooksAPI = new GetAllBooksService();
+        getAllBooksAPI.call();
+
+        Faker faker = new Faker();
+
+        return new Object[][]{
+                {
+                    new Book().getBuilder()
+                            .setBookId(getAllBooksAPI.getListOfBooksReturned().get(0).getBookId())
+                            .setBookName(faker.book().title())
+                            .setBookDescription(faker.lorem().fixedString(30))
+                            .setBookLanguage("english")
+                            .setPageCount(faker.number().numberBetween(100, 300))
+                            .setSize(20.0, 20.2, 10.0)
+                            .setPublicationYear(1975)
+                            .build()
                 }
         };
     }

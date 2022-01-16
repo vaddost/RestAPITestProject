@@ -29,4 +29,36 @@ public class BookAdditional {
                 ", size=" + size +
                 '}';
     }
+
+    public Builder getBuilder(){
+        return new Builder();
+    }
+
+    public class Builder{
+        private Builder(){
+
+        }
+
+        public Builder setPageCount(int pageCount){
+            BookAdditional.this.pageCount = pageCount;
+            return this;
+        }
+
+        public Builder setSize(double height, double width, double length){
+            if (BookAdditional.this.size == null){
+                BookAdditional.this.size = new BookSize();
+            }
+            BookAdditional.this.size =
+                    BookAdditional.this.size.getBuilder()
+                    .setHeight(height)
+                    .setWidth(width)
+                    .setLenght(length)
+                    .build();
+            return this;
+        }
+
+        public BookAdditional build(){
+            return BookAdditional.this;
+        }
+    }
 }

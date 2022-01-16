@@ -1,44 +1,42 @@
 package tests;
 
+import business.ApiVerifier;
+import listeners.LogListener;
 import models.Book;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
+import service.book.GetAllBooksService;
+import service.book.GetBookByIdService;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.testng.Assert.assertEquals;
+import static utils.BookStatusCodes.*;
 
 public class GetBookTests extends BaseTests{
 
     @Test
     public void checkGetBookWithExistedId(){
-        Book book = booksService
-                        .getBookById(existedBookId)
-                        .then()
-                            .assertThat()
-                                .statusCode(200)
-                            .extract().as(Book.class);
+        GetBookByIdService getBookByIdAPI = new GetBookByIdService(existedBookId);
+        getBookByIdAPI.call();
 
-        Book bookFromAllBooksResponse = booksService
-                        .getAllBooksWithoutPagination()
-                        .then()
-                            .assertThat()
-                                .statusCode(200)
-                            .extract()
-                                .jsonPath()
-                                .getObject("find{it.bookId == " + existedBookId + "}", Book.class);
+        GetAllBooksService getAllBooksAPI = new GetAllBooksService();
+        getAllBooksAPI.disablePagination();
+        getAllBooksAPI.call();
+        Book book = getAllBooksAPI.getBookWithId(existedBookId);
 
-
-        assertEquals(book, bookFromAllBooksResponse);
+        new ApiVerifier(getBookByIdAPI)
+                        .assertStatusCodeIs(OK.getCode())
+                        .assertResponseBodyEqualsObject(book);
     }
 
     @Test
     public void checkGetBookWithInvalidId(){
         int bookId = -1;
-        booksService.getBookById(bookId)
-                .then()
-                .assertThat()
-                    .statusCode(404)
-                    .body("statusCode", equalTo(404))
-                    .body("error", equalTo("Not Found"))
-                    .body("errorMessage", equalTo("Book with 'bookId' = '-1' doesn't exist!"));
+        GetBookByIdService getBookByIdAPI = new GetBookByIdService(bookId);
+        getBookByIdAPI.call();
+
+        new ApiVerifier(getBookByIdAPI)
+                        .assertResponseBodyAttributeValue("statusCode", NOT_FOUND.getCode())
+                        .assertResponseBodyAttributeValue("error", NOT_FOUND.getError())
+                        .assertResponseBodyAttributeValue("errorMessage",
+                                String.format(NOT_FOUND.getErrorMessage(), bookId));
     }
 }

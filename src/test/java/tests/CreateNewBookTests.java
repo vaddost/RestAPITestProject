@@ -1,60 +1,65 @@
 package tests;
 
-import io.restassured.http.ContentType;
+import business.ApiVerifier;
+import listeners.LogListener;
 import models.Book;
-import org.apache.http.HttpStatus;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Parameters;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
+import service.author.GetAuthorByBookIdService;
+import service.book.CreateNewBookService;
+import service.book.GetBookByIdService;
+import service.genre.GetGenreByBookIdService;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.testng.Assert.assertEquals;
+import static utils.BookStatusCodes.*;
 
 public class CreateNewBookTests extends BaseTests{
 
     private int authorId;
     private int genreId;
 
-    @BeforeTest
-    @Parameters({"authorId", "genreId"})
-    public void testSetUp(int authorId, int genreId){
-        this.authorId = authorId;
-        this.genreId = genreId;
+    @BeforeMethod
+    public void testSetUp(){
+        GetAuthorByBookIdService getAuthorByBookIdAPI = new GetAuthorByBookIdService(existedBookId);
+        getAuthorByBookIdAPI.call();
+
+        GetGenreByBookIdService getGenreByBookIdAPI = new GetGenreByBookIdService(existedBookId);
+        getGenreByBookIdAPI.call();
+
+        this.authorId = getAuthorByBookIdAPI.getAuthorId();
+        this.genreId = getGenreByBookIdAPI.getGenreId();
     }
 
     @Test(dataProvider = "new_book_test_data")
-    public void checkIfNewBookCanBeCreated(Book book){
-        int bookId = booksService.generateNewBookId();
-        book.setBookId(bookId);
-        Book actualBook = booksService.createNewBook(book, authorId, genreId)
-                .then()
-                    .assertThat()
-                        .statusCode(HttpStatus.SC_CREATED)
-                        .contentType(ContentType.JSON)
-                .extract()
-                    .as(Book.class);
+    public void checkIfNewBookCanBeCreated(Book book) {
 
-        assertEquals(actualBook, book);
+        CreateNewBookService createNewBookAPI = new CreateNewBookService(authorId, genreId, book);
+        createNewBookAPI.call();
 
-        Book createdBook = booksService.getBookById(bookId)
-                .then()
-                    .assertThat()
-                        .statusCode(HttpStatus.SC_OK)
-                        .contentType(ContentType.JSON)
-                    .extract()
-                        .as(Book.class);
+        new ApiVerifier(createNewBookAPI)
+                .assertStatusCodeIs(CREATED.getCode())
+                .assertResponseBodyEqualsObject(book);
 
-        assertEquals(createdBook, book);
+        GetBookByIdService getBookByIdAPI = new GetBookByIdService(book.getBookId());
+        getBookByIdAPI.call();
+
+
+
+        new ApiVerifier(getBookByIdAPI)
+                .assertStatusCodeIs(OK.getCode())
+                .assertResponseBodyEqualsObject(createNewBookAPI.extractResponseBodyAsObject(Book.class));
     }
 
-    @Test(dataProvider = "new_book_test_data")
-    public void checkNewBookWithExistedIdNotCreated(Book book){
-        book.setBookId(existedBookId);
-        booksService.createNewBook(book, authorId, genreId)
-                .then()
-                    .assertThat()
-                        .statusCode(HttpStatus.SC_CONFLICT)
-                        .body("error", equalTo("Conflict"))
-                        .body("errorMessage", equalTo("Book with such 'bookId' already exists!"));
+    @Test(dataProvider = "update_book_test_data")
+    public void checkNewBookIsNotCreatedWithExistedId(Book book){
+        CreateNewBookService createNewBookAPI = new CreateNewBookService(authorId, genreId, book);
+        createNewBookAPI.call();
+
+        new ApiVerifier(createNewBookAPI)
+                .assertStatusCodeIs(CONFLICT.getCode())
+                .assertResponseBodyAttributeValue("statusCode", CONFLICT.getCode())
+                .assertResponseBodyAttributeValue("error", CONFLICT.getError())
+                .assertResponseBodyAttributeValue("errorMessage", CONFLICT.getErrorMessage());
     }
 }
