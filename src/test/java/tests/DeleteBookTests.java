@@ -22,6 +22,7 @@ public class DeleteBookTests extends BaseTests{
                 .assertStatusCodeIs(DELETED.getCode());
 
         GetBookByIdService getBookByIdAPI = new GetBookByIdService(existedBookId);
+        getBookByIdAPI.disableLogging();
         getBookByIdAPI.call();
 
         new ApiVerifier(getBookByIdAPI)

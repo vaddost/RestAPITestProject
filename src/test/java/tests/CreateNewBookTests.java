@@ -42,6 +42,7 @@ public class CreateNewBookTests extends BaseTests{
                 .assertResponseBodyEqualsObject(book);
 
         GetBookByIdService getBookByIdAPI = new GetBookByIdService(book.getBookId());
+        getBookByIdAPI.disableLogging();
         getBookByIdAPI.call();
 
 
