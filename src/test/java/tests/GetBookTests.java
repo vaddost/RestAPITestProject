@@ -1,9 +1,7 @@
 package tests;
 
 import business.ApiVerifier;
-import listeners.LogListener;
 import models.Book;
-import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import service.book.GetAllBooksService;
 import service.book.GetBookByIdService;

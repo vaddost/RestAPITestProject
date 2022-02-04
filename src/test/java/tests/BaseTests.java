@@ -2,8 +2,6 @@ package tests;
 
 import com.github.javafaker.Faker;
 import models.Book;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import service.book.GetAllBooksService;
